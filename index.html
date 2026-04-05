@@ -1116,16 +1116,11 @@ function resetArc(){
 
 // ============ COPY SETLIST ============
 function copySetlist(){
-  let text=`${ARCS[currentStyle].name} \u2013 ${currentLevel.charAt(0).toUpperCase()+currentLevel.slice(1)} \u2013 ${totalDuration} min\n`;
-  text+="\u2500".repeat(40)+"\n\n";
+  let text='';
   currentPhases.forEach(phase=>{
-    const mins=Math.round(phase.pct*totalDuration);
-    text+=`${phase.name} (${mins} min | ${phase.bpmLo}-${phase.bpmHi} BPM)\n`;
     phase.songs.forEach(s=>{
-      const url="https://open.spotify.com/search/"+encodeURIComponent(s.a+" "+s.t);
-      text+=`  ${s.a} \u2014 ${s.t}\n  ${url}\n`;
+      text+=`${s.t} - ${s.a}\n`;
     });
-    text+="\n";
   });
   navigator.clipboard.writeText(text).then(()=>{
     showToast("Setlist copied to clipboard");
