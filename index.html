@@ -235,6 +235,16 @@ header p{
   width:16px;height:16px;opacity:0.4;transition:opacity 0.2s;flex-shrink:0;
 }
 .song-item:hover .spotify-icon{opacity:0.8}
+.song-item.kept{background:rgba(143,188,143,0.08);border:1px solid rgba(143,188,143,0.2)}
+.btn-keep{
+  padding:4px 10px;border-radius:14px;font-size:0.65em;font-weight:600;
+  letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;
+  transition:all 0.25s;font-family:inherit;border:1px solid rgba(184,169,212,0.25);
+  background:rgba(184,169,212,0.08);color:var(--text-dim);flex-shrink:0;
+}
+.btn-keep:hover{border-color:var(--sage);color:var(--sage);background:rgba(143,188,143,0.1)}
+.btn-keep.kept{border-color:var(--sage);color:var(--sage);background:rgba(143,188,143,0.15)}
+.btn-keep.kept::before{content:'\2713 ';}
 .phase-shuffle{
   position:absolute;top:16px;right:16px;width:32px;height:32px;
   border-radius:50%;background:rgba(184,169,212,0.1);
@@ -929,11 +939,13 @@ function renderCards(){
 
     let songsHtml=phase.songs.map((s,si)=>{
       const url="https://open.spotify.com/search/"+encodeURIComponent(s.a+" "+s.t);
-      return `<li class="song-item">
+      const isKept=s.kept?true:false;
+      return `<li class="song-item${isKept?' kept':''}">
         <span class="song-num">${si+1}</span>
         <a class="song-link" href="${url}" target="_blank" rel="noopener">
           <span class="artist">${s.a}</span><span class="separator">\u2014</span>${s.t}
         </a>
+        <button class="btn-keep${isKept?' kept':''}" onclick="toggleKeep(${i},${si})">${isKept?'Kept':'Keep'}</button>
         ${spotifyIcon}
       </li>`;
     }).join("");
@@ -1000,35 +1012,65 @@ function updateBpm(idx,which,val){
 }
 
 function regeneratePhaseSongs(idx){
+  const phase=currentPhases[idx];
+  const keptSongs=phase.songs.filter(s=>s.kept);
   const excludeSet=new Set();
   currentPhases.forEach((p,i)=>{
     if(i!==idx) p.songs.forEach(s=>excludeSet.add(s.a+"||"+s.t));
   });
-  const mins=Math.round(currentPhases[idx].pct*totalDuration);
-  // Scale song count: ~1 song per 3-4 min, min 3, max 7
+  keptSongs.forEach(s=>excludeSet.add(s.a+"||"+s.t));
+  const mins=Math.round(phase.pct*totalDuration);
   const songCount=Math.max(3,Math.min(7,Math.round(mins/3.5)));
-  const songs=pickSongs(currentPhases[idx],currentStyle,currentLevel,songCount,excludeSet);
-  if(songs.length>0) currentPhases[idx].songs=songs;
+  const numNeeded=Math.max(0,songCount-keptSongs.length);
+  const newSongs=pickSongs(phase,currentStyle,currentLevel,numNeeded,excludeSet);
+  // Rebuild: kept songs stay, unkept get replaced, adjust total count
+  let newIdx=0;
+  let result=[];
+  for(const s of phase.songs){
+    if(s.kept){result.push(s);}
+    else if(newIdx<newSongs.length){result.push(newSongs[newIdx++]);}
+  }
+  // If we need more songs than we had unkept slots
+  while(newIdx<newSongs.length) result.push(newSongs[newIdx++]);
+  // Trim to target count
+  phase.songs=result.slice(0,songCount);
+  renderCards();
+}
+
+function toggleKeep(phaseIdx,songIdx){
+  const song=currentPhases[phaseIdx].songs[songIdx];
+  song.kept=!song.kept;
   renderCards();
 }
 
 function shufflePhase(idx){
-  // Build exclusion set: other phases' songs + current phase's songs (so we get fresh ones)
+  const phase=currentPhases[idx];
+  const keptSongs=phase.songs.filter(s=>s.kept);
+  const numNeeded=phase.songs.length-keptSongs.length;
+  if(numNeeded===0){showToast('All songs are kept \u2014 unkeep some to shuffle');return;}
+
+  // Build exclusion set: all other phases' songs + kept songs in this phase + current unkept songs
   const excludeSet=new Set();
   currentPhases.forEach((p,i)=>{
     p.songs.forEach(s=>excludeSet.add(s.a+"||"+s.t));
   });
-  // Pick fresh songs, excluding everything currently shown
-  let songs=pickSongs(currentPhases[idx],currentStyle,currentLevel,5,excludeSet);
-  // If we couldn't get 5 fresh ones, relax to only exclude other phases
-  if(songs.length<4){
-    const otherOnly=new Set();
+  // Pick fresh songs for the unkept slots
+  let newSongs=pickSongs(phase,currentStyle,currentLevel,numNeeded,excludeSet);
+  // If not enough, relax exclusion
+  if(newSongs.length<numNeeded){
+    const relaxed=new Set();
     currentPhases.forEach((p,i)=>{
-      if(i!==idx) p.songs.forEach(s=>otherOnly.add(s.a+"||"+s.t));
+      if(i!==idx) p.songs.forEach(s=>relaxed.add(s.a+"||"+s.t));
     });
-    songs=pickSongs(currentPhases[idx],currentStyle,currentLevel,5,otherOnly);
+    keptSongs.forEach(s=>relaxed.add(s.a+"||"+s.t));
+    newSongs=pickSongs(phase,currentStyle,currentLevel,numNeeded,relaxed);
   }
-  if(songs.length>0) currentPhases[idx].songs=songs;
+  // Rebuild song list: kept songs stay in place, unkept get replaced
+  let newIdx=0;
+  phase.songs=phase.songs.map(s=>{
+    if(s.kept) return s;
+    return newIdx<newSongs.length?newSongs[newIdx++]:s;
+  });
   renderCards();
 }
 
@@ -1080,7 +1122,8 @@ function copySetlist(){
     const mins=Math.round(phase.pct*totalDuration);
     text+=`${phase.name} (${mins} min | ${phase.bpmLo}-${phase.bpmHi} BPM)\n`;
     phase.songs.forEach(s=>{
-      text+=`  ${s.a} \u2014 ${s.t}\n`;
+      const url="https://open.spotify.com/search/"+encodeURIComponent(s.a+" "+s.t);
+      text+=`  ${s.a} \u2014 ${s.t}\n  ${url}\n`;
     });
     text+="\n";
   });
