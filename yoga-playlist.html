@@ -300,6 +300,109 @@ input[type=range]::-webkit-slider-thumb{
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* Spotify connect */
+.spotify-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg-card);backdrop-filter:blur(var(--card-blur));
+  -webkit-backdrop-filter:blur(var(--card-blur));
+  border:1px solid var(--card-border);border-radius:var(--radius);
+  padding:14px 24px;margin-bottom:20px;flex-wrap:wrap;gap:10px;
+}
+.spotify-bar .spotify-status{
+  display:flex;align-items:center;gap:10px;font-size:0.85em;color:var(--text-dim);
+}
+.spotify-bar .spotify-status .dot{
+  width:8px;height:8px;border-radius:50%;background:#555;flex-shrink:0;
+}
+.spotify-bar .spotify-status .dot.connected{background:#1db954}
+.spotify-bar .spotify-user{color:var(--text);font-weight:500}
+.btn-spotify{
+  padding:10px 22px;border-radius:20px;font-size:0.8em;font-weight:600;
+  letter-spacing:0.05em;cursor:pointer;transition:all 0.3s;
+  font-family:inherit;display:flex;align-items:center;gap:8px;border:none;
+}
+.btn-spotify.connect{background:#1db954;color:#fff}
+.btn-spotify.connect:hover{background:#1ed760;box-shadow:0 0 20px rgba(29,185,84,0.3)}
+.btn-spotify.disconnect{
+  background:transparent;border:1px solid rgba(255,255,255,0.15);
+  color:var(--text-dim);font-size:0.7em;padding:6px 14px;
+}
+.btn-spotify.disconnect:hover{border-color:rgba(255,255,255,0.3);color:var(--text)}
+.btn-spotify svg{width:18px;height:18px;fill:currentColor}
+.btn-export-spotify{
+  padding:12px 28px;border-radius:var(--radius-sm);font-size:0.8em;
+  letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;
+  transition:all 0.3s;font-family:inherit;font-weight:500;
+  background:rgba(29,185,84,0.15);border:1px solid #1db954;color:#1db954;
+  display:flex;align-items:center;gap:8px;
+}
+.btn-export-spotify:hover{background:rgba(29,185,84,0.25);box-shadow:0 0 25px rgba(29,185,84,0.2);transform:translateY(-1px)}
+.btn-export-spotify:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-export-spotify svg{width:16px;height:16px;fill:currentColor}
+
+/* Spotify setup modal */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);
+  z-index:200;display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:linear-gradient(160deg,#1a1a2e,#16213e);
+  border:1px solid var(--card-border);border-radius:var(--radius);
+  padding:32px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;
+  position:relative;
+}
+.modal h2{
+  font-family:Georgia,serif;font-size:1.4em;color:var(--text-bright);
+  margin-bottom:6px;font-weight:400;
+}
+.modal .modal-sub{font-size:0.85em;color:var(--text-dim);margin-bottom:20px}
+.modal .setup-steps{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
+.modal .setup-step{
+  display:flex;gap:12px;font-size:0.85em;color:var(--text);line-height:1.6;
+}
+.modal .setup-step a{color:var(--gold);text-decoration:underline}
+.modal .setup-step code{
+  background:rgba(184,169,212,0.1);padding:2px 6px;border-radius:4px;
+  font-size:0.9em;color:var(--lavender);
+}
+.modal-input{
+  width:100%;padding:12px 16px;background:rgba(10,10,26,0.7);
+  border:1px solid rgba(184,169,212,0.2);border-radius:var(--radius-sm);
+  color:var(--text);font-size:0.95em;font-family:monospace;
+  outline:none;margin-bottom:16px;
+}
+.modal-input:focus{border-color:var(--lavender)}
+.modal-input::placeholder{color:var(--text-dim)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+.modal .btn-modal{
+  padding:10px 24px;border-radius:var(--radius-sm);font-size:0.8em;
+  letter-spacing:0.08em;cursor:pointer;font-family:inherit;font-weight:500;
+  transition:all 0.3s;
+}
+.modal .btn-modal.primary{background:#1db954;border:none;color:#fff}
+.modal .btn-modal.primary:hover{background:#1ed760}
+.modal .btn-modal.secondary{background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--text-dim)}
+.modal .btn-modal.secondary:hover{border-color:rgba(255,255,255,0.3)}
+.modal-close{
+  position:absolute;top:12px;right:16px;background:none;border:none;
+  color:var(--text-dim);font-size:1.2em;cursor:pointer;padding:4px;
+}
+
+/* Export progress */
+.export-progress{
+  margin-top:8px;font-size:0.75em;color:var(--text-dim);
+  letter-spacing:0.05em;text-align:center;
+}
+.export-progress .progress-bar{
+  height:3px;background:rgba(29,185,84,0.15);border-radius:2px;
+  margin-top:6px;overflow:hidden;
+}
+.export-progress .progress-fill{
+  height:100%;background:#1db954;border-radius:2px;
+  transition:width 0.3s;width:0%;
+}
+
 /* Responsive */
 @media(max-width:768px){
   .container{padding:16px 14px}
@@ -326,6 +429,48 @@ input[type=range]::-webkit-slider-thumb{
     <div class="header-line"></div>
   </header>
 
+  <div class="spotify-bar" id="spotifyBar">
+    <div class="spotify-status">
+      <span class="dot" id="spotifyDot"></span>
+      <span id="spotifyStatusText">Spotify not connected</span>
+    </div>
+    <button class="btn-spotify connect" id="spotifyConnectBtn" onclick="spotifyConnect()">
+      <svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+      Connect Spotify
+    </button>
+  </div>
+
+  <div class="modal-overlay" id="spotifyModal">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <h2>Connect Spotify</h2>
+      <p class="modal-sub">One-time setup to export playlists directly to your Spotify account.</p>
+      <div class="setup-steps">
+        <div class="setup-step">
+          <span class="how-num">1</span>
+          <div>Go to <a href="https://developer.spotify.com/dashboard" target="_blank">developer.spotify.com/dashboard</a> and log in with your Spotify account.</div>
+        </div>
+        <div class="setup-step">
+          <span class="how-num">2</span>
+          <div>Click <strong>Create App</strong>. Name it anything (e.g. "Yoga Planner"). For Redirect URI, paste your app URL below. Check <strong>Web API</strong>.</div>
+        </div>
+        <div class="setup-step">
+          <span class="how-num">3</span>
+          <div>Copy your <strong>Client ID</strong> from the app dashboard and paste it below.</div>
+        </div>
+        <div class="setup-step">
+          <span class="how-num">4</span>
+          <div>Your redirect URI should be: <code id="redirectUriDisplay"></code></div>
+        </div>
+      </div>
+      <input class="modal-input" type="text" id="clientIdInput" placeholder="Paste your Spotify Client ID here">
+      <div class="modal-actions">
+        <button class="btn-modal secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn-modal primary" onclick="saveClientIdAndConnect()">Connect</button>
+      </div>
+    </div>
+  </div>
+
   <details class="how-it-works" open>
     <summary>How It Works</summary>
     <div class="how-content">
@@ -344,7 +489,7 @@ input[type=range]::-webkit-slider-thumb{
         </div>
         <div class="how-step">
           <span class="how-num">4</span>
-          <div><strong>Take it to class</strong> &mdash; Use <em>Copy Full Setlist</em> to grab every song in order as plain text, ready to paste into your notes or build a Spotify playlist.</div>
+          <div><strong>Take it to class</strong> &mdash; Connect your Spotify account above, then hit <em>Export to Spotify</em> to create a ready-to-play playlist instantly. Or use <em>Copy Full Setlist</em> to grab the list as plain text.</div>
         </div>
       </div>
     </div>
@@ -391,6 +536,14 @@ input[type=range]::-webkit-slider-thumb{
     </div>
     <div class="phase-cards" id="phaseCards"></div>
     <div class="bottom-actions">
+      <button class="btn-export-spotify" id="exportSpotifyBtn" onclick="exportToSpotify()" style="display:none">
+        <svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        Export to Spotify
+      </button>
+      <div class="export-progress" id="exportProgress" style="display:none">
+        <span id="exportProgressText">Searching tracks...</span>
+        <div class="progress-bar"><div class="progress-fill" id="exportProgressFill"></div></div>
+      </div>
       <button class="btn-copy" id="copyBtn" onclick="copySetlist()">Copy Full Setlist</button>
     </div>
   </div>
@@ -1009,6 +1162,357 @@ function copySetlist(){
     setTimeout(()=>{btn.textContent="Copy Full Setlist";btn.classList.remove("copied")},2000);
   }).catch(()=>showToast("Could not copy \u2013 try selecting manually"));
 }
+
+// ============ SPOTIFY INTEGRATION ============
+const SPOTIFY_SCOPES='playlist-modify-public playlist-modify-private';
+const DEFAULT_CLIENT_ID='c91a9a87606c4e92b54624f7d0912e8b';
+let spotifyToken=null;
+let spotifyUser=null;
+
+// PKCE helpers
+function generateRandomString(len){
+  const arr=new Uint8Array(len);
+  crypto.getRandomValues(arr);
+  return Array.from(arr,b=>b.toString(16).padStart(2,'0')).join('').slice(0,len);
+}
+async function sha256(plain){
+  const enc=new TextEncoder();
+  return await crypto.subtle.digest('SHA-256',enc.encode(plain));
+}
+function base64urlencode(buf){
+  let str='';const bytes=new Uint8Array(buf);
+  bytes.forEach(b=>str+=String.fromCharCode(b));
+  return btoa(str).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+// On page load: check for auth code in URL (PKCE callback) or saved token
+(function initSpotify(){
+  const redir=location.origin+location.pathname;
+  const el=document.getElementById('redirectUriDisplay');
+  if(el) el.textContent=redir;
+
+  // Check URL for authorization code (PKCE callback) — this takes priority
+  const urlParams=new URLSearchParams(window.location.search);
+  const code=urlParams.get('code');
+  if(code){
+    // Clean URL immediately to prevent double-exchange on refresh
+    history.replaceState(null,'',location.pathname);
+    exchangeCodeForToken(code);
+    return;
+  }
+
+  // Check for error from Spotify redirect
+  const error=urlParams.get('error');
+  if(error){
+    history.replaceState(null,'',location.pathname);
+    showToast('Spotify auth: '+error);
+    return;
+  }
+
+  // Check localStorage for existing token
+  const savedToken=localStorage.getItem('spotify_token');
+  const expiry=localStorage.getItem('spotify_token_expiry');
+  if(savedToken && expiry && Date.now()<parseInt(expiry)){
+    spotifyToken=savedToken;
+    fetchSpotifyUser();
+  } else if(localStorage.getItem('spotify_refresh_token')){
+    // Token expired but we have a refresh token — try refreshing
+    refreshSpotifyToken();
+  }
+})();
+
+async function exchangeCodeForToken(code){
+  const clientId=localStorage.getItem('spotify_client_id')||DEFAULT_CLIENT_ID;
+  const verifier=localStorage.getItem('spotify_code_verifier');
+  const redir=location.origin+location.pathname;
+  if(!verifier){
+    console.error('PKCE verifier missing from localStorage');
+    showToast('Auth error — please try connecting again');
+    return;
+  }
+
+  try{
+    const res=await fetch('https://accounts.spotify.com/api/token',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:new URLSearchParams({
+        client_id:clientId,
+        grant_type:'authorization_code',
+        code:code,
+        redirect_uri:redir,
+        code_verifier:verifier
+      })
+    });
+    const data=await res.json();
+    if(data.access_token){
+      spotifyToken=data.access_token;
+      localStorage.setItem('spotify_token',data.access_token);
+      const expiry=Date.now()+(data.expires_in||3600)*1000;
+      localStorage.setItem('spotify_token_expiry',expiry);
+      if(data.refresh_token) localStorage.setItem('spotify_refresh_token',data.refresh_token);
+      localStorage.removeItem('spotify_code_verifier');
+      fetchSpotifyUser();
+    } else {
+      console.error('Token exchange failed:',data);
+      showToast('Spotify auth failed: '+(data.error_description||data.error));
+    }
+  }catch(e){
+    console.error('Token exchange error:',e);
+    showToast('Spotify auth error — check console');
+  }
+}
+
+async function refreshSpotifyToken(){
+  const clientId=localStorage.getItem('spotify_client_id')||DEFAULT_CLIENT_ID;
+  const refreshToken=localStorage.getItem('spotify_refresh_token');
+  if(!refreshToken) return;
+  try{
+    const res=await fetch('https://accounts.spotify.com/api/token',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:new URLSearchParams({
+        client_id:clientId,
+        grant_type:'refresh_token',
+        refresh_token:refreshToken
+      })
+    });
+    const data=await res.json();
+    if(data.access_token){
+      spotifyToken=data.access_token;
+      localStorage.setItem('spotify_token',data.access_token);
+      const expiry=Date.now()+(data.expires_in||3600)*1000;
+      localStorage.setItem('spotify_token_expiry',expiry);
+      if(data.refresh_token) localStorage.setItem('spotify_refresh_token',data.refresh_token);
+      fetchSpotifyUser();
+    } else {
+      // Refresh failed — clear everything so user can reconnect clean
+      localStorage.removeItem('spotify_refresh_token');
+    }
+  }catch(e){
+    console.error('Token refresh error:',e);
+  }
+}
+
+function spotifyConnect(){
+  const clientId=localStorage.getItem('spotify_client_id')||DEFAULT_CLIENT_ID;
+  if(clientId){
+    startOAuth(clientId);
+  } else {
+    document.getElementById('spotifyModal').classList.add('open');
+  }
+}
+
+function closeModal(){
+  document.getElementById('spotifyModal').classList.remove('open');
+}
+
+function saveClientIdAndConnect(){
+  const input=document.getElementById('clientIdInput');
+  const clientId=input.value.trim();
+  if(!clientId||clientId.length<10){
+    showToast('Please enter a valid Client ID');return;
+  }
+  localStorage.setItem('spotify_client_id',clientId);
+  closeModal();
+  startOAuth(clientId);
+}
+
+async function startOAuth(clientId){
+  const redir=location.origin+location.pathname;
+  const verifier=generateRandomString(64);
+  localStorage.setItem('spotify_code_verifier',verifier);
+  const challenge=base64urlencode(await sha256(verifier));
+  const scopes=encodeURIComponent(SPOTIFY_SCOPES);
+  const url=`https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redir)}&scope=${scopes}&code_challenge_method=S256&code_challenge=${challenge}&show_dialog=false`;
+  window.location.href=url;
+}
+
+async function fetchSpotifyUser(){
+  try{
+    const res=await fetch('https://api.spotify.com/v1/me',{
+      headers:{'Authorization':'Bearer '+spotifyToken}
+    });
+    if(!res.ok){
+      if(res.status===401){
+        // Try refresh before giving up
+        const refreshToken=localStorage.getItem('spotify_refresh_token');
+        if(refreshToken){
+          await refreshSpotifyToken();
+          return; // refreshSpotifyToken calls fetchSpotifyUser on success
+        }
+        return spotifyDisconnect();
+      }
+      throw new Error('API error: '+res.status);
+    }
+    spotifyUser=await res.json();
+    updateSpotifyUI(true);
+  }catch(e){
+    console.error('fetchSpotifyUser error:',e);
+    showToast('Spotify connection error');
+    spotifyDisconnect();
+  }
+}
+
+function updateSpotifyUI(connected){
+  const dot=document.getElementById('spotifyDot');
+  const text=document.getElementById('spotifyStatusText');
+  const btn=document.getElementById('spotifyConnectBtn');
+  const exportBtn=document.getElementById('exportSpotifyBtn');
+  if(connected&&spotifyUser){
+    dot.classList.add('connected');
+    text.innerHTML=`Connected as <span class="spotify-user">${spotifyUser.display_name||spotifyUser.id}</span>`;
+    btn.className='btn-spotify disconnect';
+    btn.innerHTML='Disconnect';
+    btn.onclick=spotifyDisconnect;
+    if(exportBtn) exportBtn.style.display='';
+  } else {
+    dot.classList.remove('connected');
+    text.textContent='Spotify not connected';
+    btn.className='btn-spotify connect';
+    btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg> Connect Spotify';
+    btn.onclick=spotifyConnect;
+    if(exportBtn) exportBtn.style.display='none';
+  }
+}
+
+function spotifyDisconnect(){
+  spotifyToken=null;
+  spotifyUser=null;
+  localStorage.removeItem('spotify_token');
+  localStorage.removeItem('spotify_token_expiry');
+  updateSpotifyUI(false);
+  showToast('Spotify disconnected');
+}
+
+async function spotifyFetch(url,opts={},retried=false){
+  const reqOpts={...opts,headers:{...opts.headers,'Authorization':'Bearer '+spotifyToken}};
+  if(opts.body&&typeof opts.body==='object'){
+    reqOpts.headers['Content-Type']='application/json';
+    reqOpts.body=JSON.stringify(opts.body);
+  }
+  const res=await fetch(url,reqOpts);
+  if(res.status===401 && !retried){
+    // Try refreshing token before giving up
+    const refreshToken=localStorage.getItem('spotify_refresh_token');
+    if(refreshToken){
+      await refreshSpotifyToken();
+      if(spotifyToken) return spotifyFetch(url,opts,true);
+    }
+    spotifyDisconnect();
+    throw new Error('Session expired — please reconnect Spotify');
+  }
+  if(res.status===429){
+    // Rate limited — wait and retry
+    const wait=parseInt(res.headers.get('Retry-After')||'2')*1000;
+    await new Promise(r=>setTimeout(r,wait));
+    return spotifyFetch(url,opts,retried);
+  }
+  return res;
+}
+
+async function searchSpotifyTrack(artist,title){
+  const q=encodeURIComponent(`track:${title} artist:${artist}`);
+  const res=await spotifyFetch(`https://api.spotify.com/v1/search?q=${q}&type=track&limit=3`);
+  const data=await res.json();
+  if(data.tracks&&data.tracks.items.length>0) return data.tracks.items[0].uri;
+  // Fallback: broader search
+  const q2=encodeURIComponent(`${artist} ${title}`);
+  const res2=await spotifyFetch(`https://api.spotify.com/v1/search?q=${q2}&type=track&limit=3`);
+  const data2=await res2.json();
+  if(data2.tracks&&data2.tracks.items.length>0) return data2.tracks.items[0].uri;
+  return null;
+}
+
+async function exportToSpotify(){
+  if(!spotifyToken||!spotifyUser){
+    showToast('Connect Spotify first');return;
+  }
+  if(!currentPhases.length){
+    showToast('Generate a playlist first');return;
+  }
+
+  const btn=document.getElementById('exportSpotifyBtn');
+  const prog=document.getElementById('exportProgress');
+  const progText=document.getElementById('exportProgressText');
+  const progFill=document.getElementById('exportProgressFill');
+  btn.disabled=true;
+  prog.style.display='block';
+
+  try{
+    // Collect all songs
+    const allSongs=[];
+    currentPhases.forEach(p=>p.songs.forEach(s=>allSongs.push(s)));
+    const totalSongs=allSongs.length;
+
+    // Search for track URIs
+    progText.textContent=`Searching for tracks (0/${totalSongs})...`;
+    progFill.style.width='0%';
+    const trackUris=[];
+    for(let i=0;i<allSongs.length;i++){
+      const s=allSongs[i];
+      progText.textContent=`Searching: ${s.a} \u2014 ${s.t} (${i+1}/${totalSongs})`;
+      progFill.style.width=((i+1)/totalSongs*70)+'%';
+      const uri=await searchSpotifyTrack(s.a,s.t);
+      if(uri) trackUris.push(uri);
+      // Small delay to avoid rate limits
+      if(i%5===4) await new Promise(r=>setTimeout(r,200));
+    }
+
+    if(!trackUris.length){
+      showToast('No tracks found on Spotify');
+      btn.disabled=false;prog.style.display='none';return;
+    }
+
+    // Create playlist
+    progText.textContent='Creating playlist...';
+    progFill.style.width='80%';
+    const arcName=ARCS[currentStyle]?.name||currentStyle;
+    const levelCap=currentLevel.charAt(0).toUpperCase()+currentLevel.slice(1);
+    const playlistName=`${arcName} ${levelCap} \u2013 ${totalDuration}min Yoga Flow`;
+    const desc=`Energy arc playlist: ${currentPhases.map(p=>p.name).join(' \u2192 ')}. Created with Yoga Playlist Arc Planner.`;
+
+    const createRes=await spotifyFetch(`https://api.spotify.com/v1/users/${spotifyUser.id}/playlists`,{
+      method:'POST',
+      body:{name:playlistName,description:desc,public:false}
+    });
+    if(!createRes.ok){
+      const err=await createRes.json().catch(()=>({}));
+      throw new Error('Create playlist failed: '+(err.error?.message||createRes.status));
+    }
+    const playlist=await createRes.json();
+
+    // Add tracks (max 100 per request)
+    progText.textContent='Adding tracks to playlist...';
+    progFill.style.width='90%';
+    for(let i=0;i<trackUris.length;i+=100){
+      const batch=trackUris.slice(i,i+100);
+      await spotifyFetch(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`,{
+        method:'POST',
+        body:{uris:batch}
+      });
+    }
+
+    progFill.style.width='100%';
+    progText.innerHTML=`Playlist created! <a href="${playlist.external_urls.spotify}" target="_blank" style="color:#1db954;text-decoration:underline">${playlistName}</a> (${trackUris.length} tracks)`;
+    showToast(`Playlist "${playlistName}" created in Spotify!`);
+    btn.disabled=false;
+
+  }catch(e){
+    console.error('Spotify export error:',e);
+    progText.textContent='Export failed: '+e.message;
+    progFill.style.width='0%';
+    btn.disabled=false;
+    showToast('Export failed \u2013 try reconnecting Spotify');
+  }
+}
+
+// Show/hide export button when results are generated
+const _origGenerate=generate;
+generate=function(){
+  _origGenerate();
+  const exportBtn=document.getElementById('exportSpotifyBtn');
+  if(exportBtn && spotifyToken) exportBtn.style.display='';
+};
 
 function showToast(msg){
   const t=document.getElementById("toast");
